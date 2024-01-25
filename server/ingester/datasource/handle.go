@@ -30,9 +30,9 @@ import (
 const (
 	ORIGIN_TABLE_1M = "1m"
 	ORIGIN_TABLE_1S = "1s"
-	FLOW_METRICS    = "vtap_flow"
-	APP_METRICS     = "vtap_app"
-	VTAP_ACL        = "vtap_acl"
+	NETWORK         = "network"
+	APPLICATION     = "application"
+	TRAFFIC_POLICY  = "traffic_policy"
 
 	ERR_IS_MODIFYING = "Modifying the retention time (%s), please try again later"
 )
@@ -82,29 +82,29 @@ func IsModifiedOnlyDatasource(datasource string) bool {
 }
 
 var metricsGroupTableIDs = [][]zerodoc.MetricsTableID{
-	zerodoc.VTAP_FLOW_PORT_1M: []zerodoc.MetricsTableID{zerodoc.VTAP_FLOW_EDGE_PORT_1M, zerodoc.VTAP_FLOW_PORT_1M},
-	zerodoc.VTAP_FLOW_PORT_1S: []zerodoc.MetricsTableID{zerodoc.VTAP_FLOW_EDGE_PORT_1S, zerodoc.VTAP_FLOW_PORT_1S},
-	zerodoc.VTAP_APP_PORT_1M:  []zerodoc.MetricsTableID{zerodoc.VTAP_APP_EDGE_PORT_1M, zerodoc.VTAP_APP_PORT_1M},
-	zerodoc.VTAP_APP_PORT_1S:  []zerodoc.MetricsTableID{zerodoc.VTAP_APP_EDGE_PORT_1S, zerodoc.VTAP_APP_PORT_1S},
-	zerodoc.VTAP_ACL_1M:       []zerodoc.MetricsTableID{zerodoc.VTAP_ACL_1M},
+	zerodoc.NETWORK_1M:        {zerodoc.NETWORK_MAP_1M, zerodoc.NETWORK_1M},
+	zerodoc.NETWORK_1S:        {zerodoc.NETWORK_MAP_1S, zerodoc.NETWORK_1S},
+	zerodoc.APPLICATION_1M:    {zerodoc.APPLICATION_MAP_1M, zerodoc.APPLICATION_1M},
+	zerodoc.APPLICATION_1S:    {zerodoc.APPLICATION_MAP_1S, zerodoc.APPLICATION_1S},
+	zerodoc.TRAFFIC_POLICY_1M: {zerodoc.TRAFFIC_POLICY_1M},
 }
 
 func getMetricsSubTableIDs(tableGroup, baseTable string) ([]zerodoc.MetricsTableID, error) {
 	switch tableGroup {
-	case FLOW_METRICS:
+	case NETWORK:
 		if baseTable == ORIGIN_TABLE_1S {
-			return metricsGroupTableIDs[zerodoc.VTAP_FLOW_PORT_1S], nil
+			return metricsGroupTableIDs[zerodoc.NETWORK_1S], nil
 		} else {
-			return metricsGroupTableIDs[zerodoc.VTAP_FLOW_PORT_1M], nil
+			return metricsGroupTableIDs[zerodoc.NETWORK_1M], nil
 		}
-	case APP_METRICS:
+	case APPLICATION:
 		if baseTable == ORIGIN_TABLE_1S {
-			return metricsGroupTableIDs[zerodoc.VTAP_APP_PORT_1S], nil
+			return metricsGroupTableIDs[zerodoc.APPLICATION_1S], nil
 		} else {
-			return metricsGroupTableIDs[zerodoc.VTAP_APP_PORT_1M], nil
+			return metricsGroupTableIDs[zerodoc.APPLICATION_1M], nil
 		}
-	case VTAP_ACL:
-		return metricsGroupTableIDs[zerodoc.VTAP_ACL_1M], nil
+	case TRAFFIC_POLICY:
+		return metricsGroupTableIDs[zerodoc.TRAFFIC_POLICY_1M], nil
 	default:
 		return nil, fmt.Errorf("unknown table group(%s)", tableGroup)
 	}

@@ -137,11 +137,11 @@ func (u *Unmarshaller) GetCounter() interface{} {
 		counter.MinDelay = 0
 	}
 
-	counter.FlowPortCount, u.tableCounter[zerodoc.VTAP_FLOW_PORT_1M] = u.tableCounter[zerodoc.VTAP_FLOW_PORT_1M], 0
-	counter.FlowPort1sCount, u.tableCounter[zerodoc.VTAP_FLOW_PORT_1S] = u.tableCounter[zerodoc.VTAP_FLOW_PORT_1S], 0
-	counter.FlowEdgePortCount, u.tableCounter[zerodoc.VTAP_FLOW_EDGE_PORT_1M] = u.tableCounter[zerodoc.VTAP_FLOW_EDGE_PORT_1M], 0
-	counter.FlowEdgePort1sCount, u.tableCounter[zerodoc.VTAP_FLOW_EDGE_PORT_1S] = u.tableCounter[zerodoc.VTAP_FLOW_EDGE_PORT_1S], 0
-	counter.AclCount, u.tableCounter[zerodoc.VTAP_ACL_1M] = u.tableCounter[zerodoc.VTAP_ACL_1M], 0
+	counter.FlowPortCount, u.tableCounter[zerodoc.NETWORK_1M] = u.tableCounter[zerodoc.NETWORK_1M], 0
+	counter.FlowPort1sCount, u.tableCounter[zerodoc.NETWORK_1S] = u.tableCounter[zerodoc.NETWORK_1S], 0
+	counter.FlowEdgePortCount, u.tableCounter[zerodoc.NETWORK_MAP_1M] = u.tableCounter[zerodoc.NETWORK_MAP_1M], 0
+	counter.FlowEdgePort1sCount, u.tableCounter[zerodoc.NETWORK_MAP_1S] = u.tableCounter[zerodoc.NETWORK_MAP_1S], 0
+	counter.AclCount, u.tableCounter[zerodoc.TRAFFIC_POLICY_1M] = u.tableCounter[zerodoc.TRAFFIC_POLICY_1M], 0
 	counter.OtherCount, u.tableCounter[zerodoc.VTAP_TABLE_ID_MAX] = u.tableCounter[zerodoc.VTAP_TABLE_ID_MAX], 0
 
 	return counter
