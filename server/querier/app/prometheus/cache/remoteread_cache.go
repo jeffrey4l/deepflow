@@ -43,6 +43,12 @@ const (
 	samplePtrSize = int(unsafe.Sizeof(&prompb.Sample{}))
 )
 
+type pbSample []prompb.Sample
+
+func (a pbSample) Len() int           { return len(a) }
+func (a pbSample) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a pbSample) Less(i, j int) bool { return a[i].Timestamp < a[j].Timestamp }
+
 func (c *CacheItem) Range() int64 {
 	return c.endTime - c.startTime
 }
@@ -141,6 +147,9 @@ func (c *CacheItem) FixupQueryTime(start int64, end int64) (int64, int64) {
 }
 
 func (c *CacheItem) mergeResponse(start, end int64, query *prompb.ReadResponse) *prompb.ReadResponse {
+	c.rwLock.Lock()
+	defer c.rwLock.Unlock()
+
 	log.Debugf("cache merged, query range: [%d-%d], cache range: [%d-%d]", start, end, c.startTime, c.endTime)
 	if query == nil || len(query.Results) == 0 || len(query.Results[0].Timeseries) == 0 {
 		log.Debugf("query data is nil")
@@ -233,9 +242,7 @@ func (c *CacheItem) mergeResponse(start, end int64, query *prompb.ReadResponse) 
 					existsTs.Samples = append(ts.Samples[:overlapSample], existsSamples...)
 				}
 
-				sort.Slice(existsTs.Samples, func(i, j int) bool {
-					return existsTs.Samples[i].Timestamp < existsTs.Samples[j].Timestamp
-				})
+				sort.Sort(pbSample(existsTs.Samples))
 			}
 		}
 
@@ -324,23 +331,20 @@ func (s *RemoteReadQueryCache) AddOrMerge(req *prompb.ReadRequest, resp *prompb.
 	start, end := GetPromRequestQueryTime(q)
 	start = timeAlign(start)
 
-	s.lock.Lock()
-	defer s.lock.Unlock()
-
+	s.lock.RLock()
 	item, ok := s.cache.Get(key)
+	s.lock.RUnlock()
 
 	// can not clear cache here, because other routine may get data through cache
 	if !ok {
 		item = &CacheItem{startTime: start, endTime: end, data: resp, rwLock: &sync.RWMutex{}}
+		s.lock.Lock()
 		s.cache.Add(key, item)
+		s.lock.Unlock()
 	} else {
 		// cache hit, merge data
 		atomic.AddUint64(&s.counter.Stats.CacheMerge, 1)
 		t1 := time.Now()
-
-		item.rwLock.Lock()
-		defer item.rwLock.Unlock()
-
 		item.data = item.mergeResponse(start, end, resp)
 		d := time.Since(t1)
 		atomic.AddUint64(&s.counter.Stats.CacheMergeDuration, uint64(d.Seconds()))
@@ -404,15 +408,17 @@ func (s *RemoteReadQueryCache) Get(req *prompb.Query, start int64, end int64) (*
 	start = timeAlign(start)
 
 	// lock for concurrency key reading
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.lock.RLock()
 	item, ok := s.cache.Get(key)
+	s.lock.RUnlock()
 
 	if !ok {
 		atomic.AddUint64(&s.counter.Stats.CacheMiss, 1)
 		// totally cache miss, no such key
 		emptyItem := &CacheItem{startTime: 0, endTime: 0, data: nil, rwLock: &sync.RWMutex{}, loadCompleted: make(chan struct{})}
+		s.lock.Lock()
 		s.cache.Add(key, emptyItem)
+		s.lock.Unlock()
 		return emptyItem, CacheKeyNotFound, start, end
 	}
 
