@@ -269,15 +269,15 @@ func GetMetricsByDBTableStatic(db string, table string, where string) (map[strin
 		}
 	case "flow_metrics":
 		switch table {
-		case "vtap_flow_port":
+		case "network":
 			return GetVtapFlowPortMetrics(), err
-		case "vtap_flow_edge_port":
+		case "network_map":
 			return GetVtapFlowEdgePortMetrics(), err
-		case "vtap_app_port":
+		case "application":
 			return GetVtapAppPortMetrics(), err
-		case "vtap_app_edge_port":
+		case "application_map":
 			return GetVtapAppEdgePortMetrics(), err
-		case "vtap_acl":
+		case "traffic_policy":
 			return GetVtapAclMetrics(), err
 		}
 	case "event":
@@ -334,15 +334,15 @@ func GetMetricsByDBTable(db string, table string, where string, ctx context.Cont
 		}
 	case "flow_metrics":
 		switch table {
-		case "vtap_flow_port":
+		case "network":
 			return GetVtapFlowPortMetrics(), err
-		case "vtap_flow_edge_port":
+		case "network_map":
 			return GetVtapFlowEdgePortMetrics(), err
-		case "vtap_app_port":
+		case "application":
 			return GetVtapAppPortMetrics(), err
-		case "vtap_app_edge_port":
+		case "application_map":
 			return GetVtapAppEdgePortMetrics(), err
-		case "vtap_acl":
+		case "traffic_policy":
 			return GetVtapAclMetrics(), err
 		}
 	case "event":

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Yunshan Networks
+ * Copyright (c) 2023 Yunshan Networks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,8 +97,6 @@ func GetDatasources(db string, table string) ([]string, error) {
 			tsdbType = "flow"
 		} else if table == "vtap_app_port" || table == "vtap_app_edge_port" {
 			tsdbType = "app"
-		} else if table == TABLE_NAME_VTAP_ACL {
-			tsdbType = TABLE_NAME_VTAP_ACL
 		}
 		client := &http.Client{}
 		url := fmt.Sprintf("http://localhost:20417/v1/data-sources/?type=%s", tsdbType)
@@ -131,6 +129,7 @@ func GetDatasources(db string, table string) ([]string, error) {
 }
 
 func GetDatasourceInterval(db string, table string, name string) (int, error) {
+	return 60, nil
 	var tsdbType string
 	switch db {
 	case DB_NAME_FLOW_LOG, DB_NAME_EVENT, DB_NAME_PROFILE:
@@ -147,7 +146,7 @@ func GetDatasourceInterval(db string, table string, name string) (int, error) {
 		} else if strings.HasPrefix(table, "vtap_app") {
 			tsdbType = "app"
 		} else if table == "vtap_acl" {
-			tsdbType = TABLE_NAME_VTAP_ACL
+			return 60, nil
 		}
 	case DB_NAME_DEEPFLOW_SYSTEM, DB_NAME_EXT_METRICS, DB_NAME_PROMETHEUS:
 		tsdbType = db
@@ -155,7 +154,7 @@ func GetDatasourceInterval(db string, table string, name string) (int, error) {
 		return 1, nil
 	}
 	client := &http.Client{}
-	url := fmt.Sprintf("http://localhost:20417/v1/data-sources/?type=%s", tsdbType)
+	url := fmt.Sprintf("http://localhost.20417/v1/data-sources/?type=%s", tsdbType)
 	if name != "" {
 		url += fmt.Sprintf("&name=%s", name)
 	}
@@ -200,6 +199,7 @@ func GetExtTables(db string, ctx context.Context) (values []interface{}) {
 	} else {
 		sql = "SHOW TABLES FROM " + db
 	}
+	log.Infof("query_sql: %s", sql)
 	rst, err := chClient.DoQuery(&client.QueryParams{Sql: sql})
 	if err != nil {
 		log.Error(err)

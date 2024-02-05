@@ -248,6 +248,18 @@ func (e *CHEngine) ParseShowSql(sql string) (*common.Result, []string, bool, err
 			where = strings.Join(sqlSplit[i+1:], " ")
 		}
 	}
+	switch table {
+	case "vtap_app_port":
+		table = "application"
+	case "vtap_app_edge_port":
+		table = "application_map"
+	case "vtap_flow_port":
+		table = "network"
+	case "vtap_flow_edge_port":
+		table = "network_map"
+	case "vtap_acl":
+		table = "traffic_policy"
+	}
 	switch strings.ToLower(sqlSplit[1]) {
 	case "metrics":
 		if len(sqlSplit) > 2 && strings.ToLower(sqlSplit[2]) == "functions" {
@@ -1044,6 +1056,18 @@ func (e *CHEngine) TransFrom(froms sqlparser.TableExprs) error {
 		case *sqlparser.AliasedTableExpr:
 			// 解析Table类型
 			table := strings.Trim(sqlparser.String(from), "`")
+			switch table {
+			case "vtap_app_port":
+				table = "application"
+			case "vtap_app_edge_port":
+				table = "application_map"
+			case "vtap_flow_port":
+				table = "network"
+			case "vtap_flow_edge_port":
+				table = "network_map"
+			case "vtap_acl":
+				table = "traffic_policy"
+			}
 			e.Table = table
 			// ext_metrics只有metrics表，使用virtual_table_name做过滤区分
 			if e.DB == "ext_metrics" {
@@ -1069,7 +1093,7 @@ func (e *CHEngine) TransFrom(froms sqlparser.TableExprs) error {
 			}
 			e.Model.Time.DatasourceInterval = interval
 			if e.DataSource != "" {
-				e.AddTable(fmt.Sprintf("%s.`%s.%s`", e.DB, table, e.DataSource))
+				e.AddTable(fmt.Sprintf("%s.`%s_%s`", e.DB, table, e.DataSource))
 			} else {
 				e.AddTable(fmt.Sprintf("%s.`%s`", e.DB, table))
 			}
