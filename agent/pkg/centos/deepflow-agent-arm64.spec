@@ -23,6 +23,8 @@ mkdir -p $RPM_BUILD_ROOT/usr/sbin/
 cp %pwd/output/target/release/deepflow-agent $RPM_BUILD_ROOT/usr/sbin/
 cp %pwd/output/target/release/deepflow-agent-ctl $RPM_BUILD_ROOT/usr/sbin/
 cp %pwd/output/src/ebpf/deepflow-ebpfctl $RPM_BUILD_ROOT/usr/sbin/
+mkdir -p $RPM_BUILD_ROOT/usr/bin/
+cp %pwd/output/target/release/ecapture  $RPM_BUILD_ROOT/usr/bin/
 mkdir -p $RPM_BUILD_ROOT/lib/systemd/system/
 cp %pwd/pkg/deepflow-agent.service $RPM_BUILD_ROOT/lib/systemd/system/
 mkdir -p $RPM_BUILD_ROOT/etc/
